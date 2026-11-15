@@ -1,0 +1,62 @@
+name: Build doctor
+
+# Temporary helper: compiles the Rust crate and reports the full compiler output
+# as a commit comment so the failure can be inspected without log downloads.
+on:
+  push:
+    branches: ["arena/**"]
+  workflow_dispatch:
+
+jobs:
+  doctor:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@v2
+      - name: cargo build --release
+        run: |
+          set -o pipefail
+          cargo build --release 2>&1 | tail -c 60000 | tee /tmp/build.log
+        continue-on-error: true
+      - name: cargo clippy
+        run: |
+          cargo clippy --all-targets 2>&1 | tail -c 40000 | tee /tmp/clippy.log
+        continue-on-error: true
+      - name: cargo fmt
+        run: |
+          cargo fmt --all -- --check 2>&1 | tail -c 20000 | tee /tmp/fmt.log
+        continue-on-error: true
+      - name: Report to commit comment
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SHA: ${{ github.sha }}
+        run: |
+          python3 - <<'PY'
+          import json, os, subprocess, urllib.request
+          parts = []
+          for name, path in (("build", "/tmp/build.log"), ("clippy", "/tmp/clippy.log"), ("fmt", "/tmp/fmt.log")):
+              try:
+                  text = open(path, encoding="utf-8", errors="replace").read()
+              except FileNotFoundError:
+                  text = "(no output)"
+              parts.append(f"### {name}\n```\n{text[-50000:]}\n```")
+          body = ("Build doctor report\n\n" + "\n\n".join(parts))[:64000]
+          repo = os.environ["GITHUB_REPOSITORY"]
+          sha = os.environ["SHA"]
+          req = urllib.request.Request(
+              f"https://api.github.com/repos/{repo}/commits/{sha}/comments",
+              data=json.dumps({"body": body}).encode(),
+              headers={
+                  "Authorization": f"Bearer {os.environ['GH_TOKEN']}",
+                  "Accept": "application/vnd.github+json",
+                  "Content-Type": "application/json",
+              },
+              method="POST",
+          )
+          with urllib.request.urlopen(req) as r:
+              print("comment posted", r.status)
+          PY
