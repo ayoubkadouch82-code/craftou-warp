@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CRAFT WARP</title>
+  <meta name="description" content="CRAFT WARP — محرر لبنات خفيف وسريع، بديل سكراتش وتوربو وارب مع تعاون مباشر." />
+  <link rel="icon" href="img/logo.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="css/app.css" />
+</head>
+<body>
+  <div id="app" class="app">
+
+    <!-- ===================== top bar ===================== -->
+    <header id="topbar" class="topbar">
+      <div class="brand" id="brand" title="CRAFT WARP">
+        <img src="img/logo.svg" alt="" class="brand-logo" />
+        <span class="brand-name">CRAFT<span>WARP</span></span>
+      </div>
+
+      <nav class="menus" id="menus">
+        <button class="menu-btn" data-menu="file">ملف</button>
+        <button class="menu-btn" data-menu="edit">تعديل</button>
+        <button class="menu-btn" data-menu="collab">تعاون</button>
+        <button class="menu-btn" data-menu="help">مساعدة</button>
+      </nav>
+
+      <div class="project-name-wrap">
+        <input id="project-name" class="project-name" value="مشروع بلا عنوان" maxlength="60" spellcheck="false" aria-label="اسم المشروع" />
+        <span id="save-state" class="save-state">محفوظ</span>
+      </div>
+
+      <div class="top-actions">
+        <div id="presence" class="presence" aria-label="المشاركون"></div>
+        <button id="btn-collab" class="pill-btn collab-btn" title="ابدأ جلسة تعاون">
+          <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M16 11c1.7 0 3-1.3 3-3s-1.3-3-3-3-3 1.3-3 3 1.3 3 3 3zm-8 0c1.7 0 3-1.3 3-3S9.7 5 8 5 5 6.3 5 8s1.3 3 3 3zm0 2c-2.3 0-7 1.2-7 3.5V19h14v-2.5C15 14.2 10.3 13 8 13zm8 0c-.3 0-.6 0-1 .1 1.2.9 2 2 2 3.4V19h6v-2.5c0-2.3-4.7-3.5-7-3.5z"/></svg>
+          <span data-i18n="collab">تعاون</span>
+        </button>
+        <button id="btn-lang" class="icon-btn" title="Language">ع/EN</button>
+        <button id="btn-fullscreen" class="icon-btn" title="ملء الشاشة">
+          <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M4 4h6v2H6v4H4V4zm10 0h6v6h-2V6h-4V4zM4 14h2v4h4v2H4v-6zm14 0h2v6h-6v-2h4v-4z"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- ===================== main ===================== -->
+    <main class="main">
+
+      <!-- block palette -->
+      <aside id="palette" class="palette">
+        <div class="category-rail" id="category-rail"></div>
+        <div class="palette-scroll" id="palette-scroll"></div>
+        <div class="palette-trash" id="palette-trash">
+          <svg viewBox="0 0 24 24" width="34" height="34"><path fill="currentColor" d="M6 19a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+          <span data-i18n="dragHere">اسحب هنا لحذف اللبنات</span>
+        </div>
+      </aside>
+
+      <!-- workspace -->
+      <section id="workspace-wrap" class="workspace-wrap">
+        <svg id="block-canvas" class="block-canvas" xmlns="http://www.w3.org/2000/svg">
+          <defs id="block-defs"></defs>
+          <g id="workspace-root" class="workspace-root">
+            <g id="layer-grid" class="layer-grid"></g>
+            <g id="layer-blocks" class="layer-blocks"></g>
+            <g id="layer-floating" class="layer-floating"></g>
+          </g>
+        </svg>
+        <div id="cursor-layer" class="cursor-layer"></div>
+        <div id="input-overlay" class="input-overlay" hidden></div>
+
+        <div class="workspace-tools">
+          <button id="ws-zoom-in" class="ws-tool" title="تكبير">+</button>
+          <button id="ws-zoom-out" class="ws-tool" title="تصغير">−</button>
+          <button id="ws-zoom-reset" class="ws-tool" title="إعادة الضبط">◎</button>
+          <button id="ws-cleanup" class="ws-tool" title="ترتيب اللبنات">⇲</button>
+        </div>
+        <div id="ws-empty" class="ws-empty">
+          <img src="img/logo.svg" alt="" width="72" height="72" />
+          <p>اسحب اللبنات من القائمة وابدأ البناء</p>
+        </div>
+      </section>
+
+      <!-- stage column -->
+      <section class="stage-column">
+        <div class="stage-head">
+          <div class="stage-controls">
+            <button id="btn-green-flag" class="flag-btn" title="تشغيل">
+              <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M8 3v18H5V3h3zm2 0l10 3-10 3V3z"/></svg>
+            </button>
+            <button id="btn-stop" class="stop-btn" title="إيقاف">
+              <svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M6 6h12v12H6z"/></svg>
+            </button>
+            <button id="btn-small-stage" class="stage-size" title="حجم المسرح">◱</button>
+          </div>
+          <div class="stage-right">
+            <button id="btn-chat" class="pill-btn ghost-btn" title="الدردشة">
+              <svg viewBox="0 0 24 24" width="15" height="15"><path fill="currentColor" d="M20 2H4a2 2 0 0 0-2 2v18l4-4h14a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2z"/></svg>
+              <span data-i18n="chat">الدردشة</span>
+              <span id="chat-badge" class="badge" hidden>0</span>
+            </button>
+            <button id="btn-collab-side" class="pill-btn ghost-btn" title="المشاركون">
+              <svg viewBox="0 0 24 24" width="15" height="15"><path fill="currentColor" d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm0 2c-3.3 0-8 1.6-8 4.5V21h16v-2.5c0-2.9-4.7-4.5-8-4.5z"/></svg>
+              <span data-i18n="people">المشاركون</span>
+            </button>
+          </div>
+        </div>
+
+        <div id="stage-wrap" class="stage-wrap">
+          <canvas id="stage" width="480" height="360"></canvas>
+          <div id="stage-ask" class="ask-bar" hidden>
+            <input id="ask-input" type="text" placeholder="اكتب إجابتك…" />
+            <button id="ask-send" class="send-btn">↵</button>
+          </div>
+          <div id="stage-badge" class="stage-badge">480 × 360</div>
+        </div>
+
+        <div class="sprite-panel">
+          <div class="sprite-head">
+            <span class="sprite-head-title" data-i18n="sprites">الكائنات</span>
+            <div class="sprite-head-actions">
+              <button id="btn-choose-sprite" class="sprite-tool" title="اختر كائنًا">
+                <svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+              </button>
+              <button id="btn-paint-sprite" class="sprite-tool" title="ارسم كائنًا">
+                <svg viewBox="0 0 24 24" width="40" height="16"><path fill="currentColor" d="M3 17.2V21h3.8L18 9.8 14.2 6 3 17.2zM20.7 6.6a1 1 0 0 0 0-1.4l-2.9-2.9a1 1 0 0 0-1.4 0l-1.6 1.6L18.6 8l2.1-1.4z"/></svg>
+              </button>
+              <button id="btn-upload-sprite" class="sprite-tool" title="ارفع كائنًا">
+                <svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M12 3l5 5h-3v6h-4V8H7l5-5zM5 18h14v3H5v-3z"/></svg>
+              </button>
+              <button id="btn-dup-sprite" class="sprite-tool" title="تكرار">
+                <svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2z"/></svg>
+              </button>
+              <button id="btn-del-sprite" class="sprite-tool danger" title="حذف">
+                <svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M6 19a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+              </button>
+            </div>
+          </div>
+          <div id="sprite-grid" class="sprite-grid"></div>
+
+          <div id="sprite-info" class="sprite-info">
+            <label class="si-name">
+              <span data-i18n="sprite">الكائن</span>
+              <input id="si-name" type="text" maxlength="40" />
+            </label>
+            <label class="si-num"><span>X</span><input id="si-x" type="number" step="1" /></label>
+            <label class="si-num"><span>Y</span><input id="si-y" type="number" step="1" /></label>
+            <label class="si-num"><span>الحجم</span><input id="si-size" type="number" min="1" max="1000" /></label>
+            <label class="si-num si-dir"><span>الاتجاه</span><input id="si-dir" type="number" min="0" max="360" /></label>
+            <div class="si-toggles">
+              <button id="si-visible" class="toggle-btn" title="إظهار/إخفاء">
+                <svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M12 6c-5 0-9 4-10 6 1 2 5 6 10 6s9-4 10-6c-1-2-5-6-10-6zm0 10a4 4 0 1 1 0-8 4 4 0 0 1 0 8z"/></svg>
+              </button>
+              <button id="si-rot" class="toggle-btn" title="نمط الدوران">
+                <svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M12 5V2L8 6l4 4V7a5 5 0 1 1-5 5H5a7 7 0 1 0 7-7z"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="tab-bar" id="tab-bar">
+            <button class="tab active" data-tab="code" data-i18n="code">اللبنات</button>
+            <button class="tab" data-tab="costumes" data-i18n="costumes">المظاهر</button>
+            <button class="tab" data-tab="sounds" data-i18n="sounds">الأصوات</button>
+            <button class="tab" data-tab="collab" data-i18n="team">الفريق</button>
+          </div>
+          <div class="tab-content" id="tab-content">
+            <div class="tab-pane" data-pane="code">
+              <p class="hint" data-i18n="codeHint">اسحب اللبنات إلى مساحة العمل لبناء السكربت.</p>
+            </div>
+            <div class="tab-pane" data-pane="costumes" hidden></div>
+            <div class="tab-pane" data-pane="sounds" hidden></div>
+            <div class="tab-pane" data-pane="collab" hidden>
+              <div id="team-list" class="team-list"></div>
+              <div id="activity" class="activity"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- chat dock -->
+    <aside id="chat-dock" class="chat-dock" hidden>
+      <header class="chat-head">
+        <strong data-i18n="chat">الدردشة</strong>
+        <button id="chat-close" class="icon-btn small">✕</button>
+      </header>
+      <div id="chat-list" class="chat-list"></div>
+      <div class="chat-compose">
+        <button id="chat-image-btn" class="icon-btn" title="إرسال صورة">🖼</button>
+        <input id="chat-input" type="text" placeholder="اكتب رسالة…" maxlength="600" />
+        <button id="chat-send" class="send-btn">➤</button>
+        <input id="chat-image-input" type="file" accept="image/*" hidden />
+      </div>
+    </aside>
+
+    <!-- ===================== bottom bar ===================== -->
+    <footer id="bottombar" class="bottombar">
+      <div class="bb-left">
+        <span class="bb-dot"></span>
+        <span id="bb-status">جاهز</span>
+        <span class="bb-sep">•</span>
+        <span id="bb-engine">المحرك: Rust</span>
+      </div>
+      <div class="bb-center">
+        <button id="btn-exe" class="exe-btn">
+          <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M12 3v10.6l3.3-3.3 1.4 1.4L12 17.4l-4.7-5.7 1.4-1.4L12 13.6V3h0zM5 19h14v2H5z"/></svg>
+          <span data-i18n="downloadExe">تحميل CRAFT WARP.exe</span>
+        </button>
+        <span class="bb-version">v0.1.0</span>
+      </div>
+      <div class="bb-right">
+        <button id="btn-save" class="link-btn" data-i18n="save">حفظ</button>
+        <button id="btn-download-sb3" class="link-btn" data-i18n="exportSb3">تصدير .sb3</button>
+        <button id="btn-import" class="link-btn" data-i18n="import">استيراد</button>
+        <input id="file-import" type="file" accept=".sb3,.sb2,.json,.sprite3" hidden />
+      </div>
+    </footer>
+
+    <!-- ===================== overlays ===================== -->
+    <div id="modal-layer" class="modal-layer" hidden>
+      <div class="modal" role="dialog" aria-modal="true">
+        <header class="modal-head">
+          <h2 id="modal-title">عنوان</h2>
+          <button id="modal-close" class="icon-btn">✕</button>
+        </header>
+        <div id="modal-body" class="modal-body"></div>
+      </div>
+    </div>
+
+    <div id="menu-layer" class="menu-layer" hidden></div>
+    <div id="toasts" class="toasts"></div>
+    <div id="boot" class="boot">
+      <img src="img/logo.svg" alt="" width="84" height="84" />
+      <h1>CRAFT WARP</h1>
+      <p>جارٍ التحميل…</p>
+      <div class="boot-bar"><i></i></div>
+    </div>
+  </div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

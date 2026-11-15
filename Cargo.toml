@@ -1,0 +1,31 @@
+[package]
+name = "craftwarp"
+version = "0.1.0"
+edition = "2021"
+authors = ["CRAFT WARP contributors"]
+description = "CRAFT WARP — a lightweight, fast Scratch/TurboWarp alternative with real-time collaboration"
+license = "MIT"
+repository = "https://github.com/ayoubkadouch82-code/craftou-warp"
+rust-version = "1.75"
+
+[dependencies]
+axum = { version = "0.7", features = ["ws", "query", "json"] }
+tokio = { version = "1", features = ["full"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tower = "0.4"
+tower-http = { version = "0.5", features = ["cors", "trace"] }
+include_dir = "0.7"
+futures-util = "0.3"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+[profile.release]
+opt-level = "z"      # small binary: CRAFT WARP ships as a single lightweight exe
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true
+
+[profile.dev]
+opt-level = 1
