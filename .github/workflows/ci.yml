@@ -1,0 +1,52 @@
+name: CI
+
+on:
+  push:
+    branches: [main, "arena/**", "feat/**"]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  web-tests:
+    name: Editor tests (node)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Unit tests (md5/zip/vm/sb3/painter)
+        run: npm run test:core
+      - name: Collaboration integration
+        run: npm run test:collab
+      - name: UI smoke test (jsdom)
+        run: npm run test:ui
+
+  rust-build:
+    name: Rust build (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: cargo fmt
+        run: cargo fmt --all -- --check || echo "::warning::cargo fmt would reformat some files"
+      - name: cargo clippy
+        run: cargo clippy --all-targets || echo "::warning::clippy reported warnings"
+      - name: cargo build --release
+        run: cargo build --release
+      - name: cargo test
+        run: cargo test --release
+      - uses: actions/upload-artifact@v4
+        with:
+          name: craftwarp-${{ matrix.os }}
+          path: |
+            target/release/craftwarp
+            target/release/craftwarp.exe
+          if-no-files-found: warn

@@ -1,0 +1,104 @@
+name: Release (exe for every OS)
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag to build (e.g. v0.1.0)"
+        required: false
+        default: "v0.1.0"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build ${{ matrix.asset }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            bin: craftwarp.exe
+            asset: craftwarp-windows-x64.exe
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            bin: craftwarp
+            asset: craftwarp-linux-x64
+          - os: macos-latest
+            target: aarch64-apple-darwin
+            bin: craftwarp
+            asset: craftwarp-macos-arm64
+          - os: macos-13
+            target: x86_64-apple-darwin
+            bin: craftwarp
+            asset: craftwarp-macos-x64
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: ${{ matrix.target }}
+      - name: Build release binary
+        run: cargo build --release --target ${{ matrix.target }}
+      - name: Package asset
+        shell: bash
+        run: |
+          mkdir -p dist
+          cp "target/${{ matrix.target }}/release/${{ matrix.bin }}" "dist/${{ matrix.asset }}"
+          cp README.md LICENSE dist/
+          if [ "${{ runner.os }}" != "Windows" ]; then strip "dist/${{ matrix.asset }}" || true; fi
+          ls -lh dist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.asset }}
+          path: dist/*
+
+  release:
+    name: Publish release
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+      - name: Show artifacts
+        run: ls -lh dist
+      - name: Publish
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.tag || github.ref_name }}
+          name: CRAFT WARP ${{ inputs.tag || github.ref_name }}
+          draft: false
+          generate_release_notes: true
+          body: |
+            ## CRAFT WARP ${{ inputs.tag || github.ref_name }}
+
+            بديل خفيف وسريع لسكراتش وتوربو وارب — Rust + محرر لبنات + تعاون مباشر.
+
+            **التشغيل:** حمّل الملف المناسب لنظامك وشغّله، ثم افتح http://localhost:8080
+
+            | النظام | الملف |
+            |---|---|
+            | ويندوز 64 | `craftwarp-windows-x64.exe` |
+            | لينكس 64 | `craftwarp-linux-x64` |
+            | ماك Apple Silicon | `craftwarp-macos-arm64` |
+            | ماك Intel | `craftwarp-macos-x64` |
+
+            - استيراد/تصدير مشاريع Scratch `.sb3`
+            - 119 لبنة + نسخ + لبنات مخصصة
+            - مكتبة كائنات وأصوات وخلفيات
+            - تعاون مباشر برمز 6 أحرف + دردشة بصور
+          files: |
+            dist/craftwarp-windows-x64.exe
+            dist/craftwarp-linux-x64
+            dist/craftwarp-macos-arm64
+            dist/craftwarp-macos-x64
