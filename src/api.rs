@@ -86,10 +86,8 @@ pub fn slug(name: &str) -> String {
         } else if c.is_alphanumeric() {
             // keep unicode letters (Arabic project names are common) 
             out.push(c);
-        } else if c == '-' || c == '_' || c == ' ' {
-            if !out.ends_with('-') {
-                out.push('-');
-            }
+        } else if (c == '-' || c == '_' || c == ' ') && !out.ends_with('-') {
+            out.push('-');
         }
         if out.chars().count() >= 48 {
             break;

@@ -7,6 +7,9 @@ on:
     branches: ["arena/**"]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   doctor:
     runs-on: ubuntu-latest
@@ -52,3 +55,16 @@ jobs:
               body = "\n".join(block)[:5000]
               print(f"::error title={name}::{urllib.parse.quote(body, safe='')}")
           PY
+      - name: Commit Cargo.lock if missing
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH: ${{ github.ref_name }}
+        run: |
+          if [ -f Cargo.lock ] && ! git ls-files --error-unmatch Cargo.lock >/dev/null 2>&1; then
+            base64 -w0 Cargo.lock > /tmp/lock.b64
+            gh api "repos/$GITHUB_REPOSITORY/contents/Cargo.lock" -X PUT \
+              -f message="chore: pin dependencies with Cargo.lock" \
+              -f branch="$BRANCH" \
+              -f content=@/tmp/lock.b64 && echo "Cargo.lock committed"
+          fi
