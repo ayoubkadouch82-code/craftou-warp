@@ -9,6 +9,7 @@
     <img alt="SB3" src="https://img.shields.io/badge/Scratch-.sb3%20import%2Fexport-blue" />
     <img alt="License" src="https://img.shields.io/badge/license-MIT-green" />
   </p>
+  <p><a href="https://github.com/ayoubkadouch82-code/craftou-warp/actions/workflows/ci.yml"><img src="https://github.com/ayoubkadouch82-code/craftou-warp/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI"></a></p>
   <p><a href="#التشغيل-السريع">التشغيل</a> • <a href="#التعاون-collab">التعاون</a> • <a href="#تحميل-النسخة-exe">تحميل EXE</a> • <a href="docs/ARCHITECTURE.md">البنية</a> • <a href="docs/SB3-COMPATIBILITY.md">توافق SB3</a></p>
 </div>
 
@@ -29,7 +30,7 @@
 | | CRAFT WARP | Scratch | TurboWarp |
 |---|---|---|---|
 | المحرك | Rust + JS خفيف | Flash/JS | JS |
-| الحجم | ثنائي واحد ~4MB + واجهة 380KB | كبير | متوسط |
+| الحجم | ثنائي واحد **~1.5MB** + واجهة 384KB | كبير | متوسط |
 | استيراد/تصدير .sb3 | ✅ | ✅ | ✅ |
 | تعاون مباشر برمز | ✅ | ❌ | ❌ |
 | دردشة بصور داخل المحرر | ✅ | ❌ | ❌ |
@@ -57,11 +58,18 @@ CW_PORT=9000 CW_DATA_DIR=./data craftwarp
 
 ### 2) النسخة الجاهزة (exe)
 
-من صفحة **[Releases](https://github.com/ayoubkadouch82-code/craftou-warp/releases/latest)**:
+الإصدار الحالي: **[v0.1.0](https://github.com/ayoubkadouch82-code/craftou-warp/releases/tag/v0.1.0)** — مُبنى ومُختبَر على GitHub Actions.
 
-- `craftwarp-windows-x64.exe` → شغّله مباشرة (لا يحتاج تثبيت).
-- `craftwarp-linux-x64` — `chmod +x` ثم تشغيل.
-- `craftwarp-macos-*` للنظامين Intel و Apple Silicon.
+| النظام | الملف | الحجم |
+|---|---|---|
+| ويندوز 64 | [`craftwarp-windows-x64.exe`](https://github.com/ayoubkadouch82-code/craftou-warp/releases/latest/download/craftwarp-windows-x64.exe) | 1.5 MB |
+| لينكس 64 | [`craftwarp-linux-x64`](https://github.com/ayoubkadouch82-code/craftou-warp/releases/latest/download/craftwarp-linux-x64) | 1.8 MB |
+| ماك Apple Silicon | [`craftwarp-macos-arm64`](https://github.com/ayoubkadouch82-code/craftou-warp/releases/latest/download/craftwarp-macos-arm64) | 1.5 MB |
+| ماك Intel | [`craftwarp-macos-x64`](https://github.com/ayoubkadouch82-code/craftou-warp/releases/latest/download/craftwarp-macos-x64) | 1.6 MB |
+
+- `craftwarp-windows-x64.exe` → شغّله مباشرة (لا يحتاج تثبيت)، ثم افتح <http://localhost:8080>.
+- `craftwarp-linux-x64` — `chmod +x craftwarp-linux-x64 && ./craftwarp-linux-x64`.
+- إذا منع ويندوز التشغيل (SmartScreen): More info → Run anyway (الملف غير موقّع رقميًا).
 
 > زر **«تحميل CRAFT WARP.exe»** في الشريط السفلي للمحرر ينقلك مباشرة إلى آخر إصدار.
 
@@ -148,6 +156,8 @@ npm test            # اختبارات الوحدة + التعاون + الوا�
 ---
 
 ## تحميل النسخة EXE
+
+> الإصدار `v0.1.0` منشور فعليًا مع الأربعة ملفات (تم بناؤه واختباره على runners حقيقية).
 
 - زر التحميل الأخضر في الشريط السفلي للمحرر (`#btn-exe`) يفتح:  
   `https://github.com/ayoubkadouch82-code/craftou-warp/releases/latest`
@@ -270,6 +280,6 @@ MIT — راجع [LICENSE](LICENSE).
 
 ## English in one minute
 
-**CRAFT WARP** is a lightweight Scratch/TurboWarp alternative: a single Rust binary (Axum) that serves a Scratch-looking block editor with 119 blocks, a full block VM (clones, custom blocks, broadcasts), `.sb3` import/export with assets, a generated sprite/backdrop/sound library, and **real-time collaboration**: one friend hosts, gets a 6-character code, the other joins with it — you both see each other's edits, cursors, selected sprite, and can chat with images. The bottom bar has a download button that points at the latest GitHub release (`craftwarp-windows-x64.exe`).
+**CRAFT WARP** is a lightweight Scratch/TurboWarp alternative: a single ~1.5 MB Rust binary (Axum) that serves a Scratch-looking block editor with 119 blocks, a full block VM (clones, custom blocks, broadcasts), `.sb3` import/export with assets, a generated sprite/backdrop/sound library, and **real-time collaboration**: one friend hosts, gets a 6-character code, the other joins with it — you both see each other's edits, cursors, selected sprite, and can chat with images. The bottom bar has a download button that points at the latest GitHub release (`craftwarp-windows-x64.exe`).
 
 Dev quick start: `cargo run --release` (needs Rust) or `npm run dev` (Node preview server, no Rust). Tests: `npm test`.
