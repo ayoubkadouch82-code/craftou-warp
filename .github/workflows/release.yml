@@ -17,6 +17,7 @@ jobs:
   build:
     name: Build ${{ matrix.asset }}
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 40
     strategy:
       fail-fast: false
       matrix:
@@ -29,11 +30,13 @@ jobs:
             target: x86_64-unknown-linux-gnu
             bin: craftwarp
             asset: craftwarp-linux-x64
-          - os: macos-latest
+          - os: macos-15
             target: aarch64-apple-darwin
             bin: craftwarp
             asset: craftwarp-macos-arm64
-          - os: macos-13
+          # macos-13 (Intel) is retired: a job for it queues forever, so the
+          # x86_64 build uses the current Intel image.
+          - os: macos-15-intel
             target: x86_64-apple-darwin
             bin: craftwarp
             asset: craftwarp-macos-x64
@@ -63,6 +66,8 @@ jobs:
   release:
     name: Publish release
     needs: build
+    # Publish whatever was built, even if one platform leg failed.
+    if: always() && needs.build.result != 'cancelled'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -98,7 +103,4 @@ jobs:
             - مكتبة كائنات وأصوات وخلفيات
             - تعاون مباشر برمز 6 أحرف + دردشة بصور
           files: |
-            dist/craftwarp-windows-x64.exe
-            dist/craftwarp-linux-x64
-            dist/craftwarp-macos-arm64
-            dist/craftwarp-macos-x64
+            dist/craftwarp-*
