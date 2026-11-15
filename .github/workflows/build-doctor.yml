@@ -29,26 +29,22 @@ jobs:
         run: |
           cargo fmt --all -- --check 2>&1 | tail -c 20000 | tee /tmp/fmt.log
         continue-on-error: true
-      - name: Report
+      - name: Annotate errors
         if: always()
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SHA: ${{ github.sha }}
-          BRANCH: ${{ github.ref_name }}
+        shell: bash
         run: |
-          {
-            echo "## Build doctor"
-            for f in build clippy fmt; do
-              echo ""
-              echo "### $f"
-              echo '```'
-              tail -c 45000 /tmp/$f.log 2>/dev/null || echo "(no output)"
-              echo '```'
-            done
-          } > /tmp/report.md
-          head -c 1000000 /tmp/report.md >> "$GITHUB_STEP_SUMMARY"
-          base64 -w0 /tmp/report.md > /tmp/report.b64
-          gh api "repos/$GITHUB_REPOSITORY/contents/ci-report.md" -X PUT \
-            -f message="ci: build doctor report" \
-            -f branch="$BRANCH" \
-            -f content=@/tmp/report.b64 || echo "contents upload unavailable"
+          python3 - <<'PY' > /tmp/annot.txt
+          import urllib.parse
+          for name in ("build", "clippy"):
+              try:
+                  text = open(f"/tmp/{name}.log", encoding="utf-8", errors="replace").read()
+              except FileNotFoundError:
+                  continue
+              lines = [l for l in text.splitlines() if l.strip()]
+              # keep error blocks and the tail of the log
+              keep = [l for l in lines if l.startswith(("error", "warning:")) or "--> " in l][:60]
+              body = "\n".join(keep) or "\n".join(lines[-40:])
+              body = body[:6000]
+              print(f"::error title={name} log::{urllib.parse.quote(body, safe='')}")
+          PY
+          cat /tmp/annot.txt
